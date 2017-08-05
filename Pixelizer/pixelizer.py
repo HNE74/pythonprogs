@@ -7,6 +7,7 @@ import argparse
 import numpy as np
 from PIL import Image, ImageDraw
 
+
 ''' ******************************************************
     *** Creates a raw pixeled output from input image. ***
     ****************************************************** '''
@@ -14,37 +15,51 @@ class Pixelizer:
 
     input_file = None
     output_file = None
-    output_scale = None
+    output_scale_from = None
+    output_scale_to = None
     
     image = None
     img_width = None
     img_height = None
     pix_width = None
     pix_height = None
+    old_pix_width = 0
+    old_pix_height = 0
 
-    def __init__(self, input_file, output_file, output_scale):
+    def __init__(self, input_file, output_file, output_scale, output_scale_to=-1):
         self.input_file = input_file
         self.output_file = output_file
-        self.output_scale = output_scale
+        self.output_scale_from = output_scale
+        if output_scale_to == -1:
+            self.output_scale_to = output_scale+1
+        else:
+            self.output_scale_to = output_scale_to
         
     def execute(self):
         self.image = Image.open(self.input_file)
         
-        self.img_width, self.img_height = self.image.size[0], self.image.size[1]
-        self.pix_width = int(self.img_width / self.output_scale)
-        self.pix_height = int(self.img_height / self.output_scale)
-        print("Input image dims: %d x %d" % (self.img_width, self.img_height))
-        print("Output pixel dims: %d x %d" % (self.pix_width, self.pix_height))
+        ndx = 0
+        for output_scale in range(self.output_scale_from, self.output_scale_to):
+            self.img_width, self.img_height = self.image.size[0], self.image.size[1]
+            self.pix_width = int(self.img_width / output_scale)
+            self.pix_height = int(self.img_height / output_scale)
+            if self.old_pix_width == self.pix_width and self.old_pix_height == self.pix_height:
+                continue
+            print("Input image dims: %d x %d" % (self.img_width, self.img_height))
+            print("Output pixel dims: %d x %d" % (self.pix_width, self.pix_height))
         
-        if self.pix_width == 0 or self.pix_height == 0:
-            print("Pixel width and pixel height must be at least 1, please decrease scale.")
-            return
-        else:
-            print("Start pixelizing image.")
-        self.pixelize()
-        print("Finished pixelizing image.")
+            if self.pix_width == 0 or self.pix_height == 0:
+                print("Pixel width and pixel height must be at least 1, please decrease scale.")
+                return
+            else:
+                print("Start pixelizing image.")
+            self.pixelize(ndx)
+            print("Finished pixelizing image.")
+            self.old_pix_width = self.pix_width
+            self.old_pix_height = self.pix_height
+            ndx += 1
     
-    def pixelize(self):
+    def pixelize(self, ndx):
         x_steps = self.img_width / self.pix_width
         y_steps = self.img_height / self.pix_height
         x_pos = 0
@@ -61,7 +76,8 @@ class Pixelizer:
                 x_pos += self.pix_width
             x_pos = 0
             y_pos += self.pix_height
-        new_image.save(self.output_file)
+        output_file = (str(ndx) + ".").join(self.output_file.rsplit('.', 1))
+        new_image.save(output_file)
                 
     def get_pixel(self, image):
         # Calculate avarage color
@@ -92,10 +108,15 @@ def main():
     # add expected arguments
     parser.add_argument('--file', dest='imgFile', required=True)
     parser.add_argument('--scale', dest='scale', required=True)
+    parser.add_argument('--to_scale', dest='to_scale', required=False)
     parser.add_argument('--out', dest='outFile', required=True)
     args = parser.parse_args() 
      
-    pixelizer = Pixelizer(args.imgFile, args.outFile, int(args.scale))
+    if args.to_scale == None:
+        pixelizer = Pixelizer(args.imgFile, args.outFile, int(args.scale))
+    else:
+        pixelizer = Pixelizer(args.imgFile, args.outFile, int(args.scale), int(args.to_scale))
+
     pixelizer.execute()
 
 if __name__ == '__main__':
