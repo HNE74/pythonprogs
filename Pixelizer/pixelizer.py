@@ -98,7 +98,7 @@ class Pixelizer:
 ''' ******************************************************
     *** Script parameters:                             ***
     *** --file: Input file                             ***
-    *** --scale, to_scal: Pixel creation ratio         ***
+    *** --scale, to_scale: Pixel creation ratio         ***
     *** --out: Output file                             ***            
     ****************************************************** '''
 def main():
