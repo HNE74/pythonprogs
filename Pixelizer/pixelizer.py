@@ -128,6 +128,7 @@ class Pixelizer:
                 pixel_image = self.get_pixel(subimage)
                 # Paste pixel to new image
                 new_image.paste(pixel_image, (x_pos, y_pos))
+                pixel_image.close()
                 x_pos += self.pix_width
             x_pos = 0
             y_pos += self.pix_height
