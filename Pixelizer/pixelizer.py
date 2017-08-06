@@ -138,6 +138,7 @@ class Pixelizer:
         # Save single image
         output_file = (str(ndx) + ".").join(self.output_file.rsplit('.', 1))
         image.save(output_file)
+        image.close()
         # Append filename to list of poster images
         self.poster_image_names.append(output_file)       
                 
