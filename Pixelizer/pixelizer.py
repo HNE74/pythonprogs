@@ -49,6 +49,7 @@ class Pixelizer:
 
         
     def execute(self): 
+        # Execute pixelization
         ndx = 0
         for output_scale in range(self.output_scale_from, self.output_scale_to, self.delta_scale):
             self.pix_width = int(self.img_width / output_scale)
@@ -82,6 +83,7 @@ class Pixelizer:
         poster_height = self.img_height * height_factor 
         poster_image = Image.new('RGB', (poster_width, poster_height))
         
+        # Fill poster with previously created pictures
         col = 0
         row = 0
         print("Creating post with width " + str(poster_width) + " and height " + str(poster_height) + ".")
@@ -95,6 +97,8 @@ class Pixelizer:
             if col >= self.poster_cols:
                 col = 0
                 row +=1
+                
+        # Add original picture at end of poster
         xpos_tile = col * self.img_width
         ypos_tile = row * self.img_height
         orig_image = Image.open(self.input_file)
@@ -104,12 +108,15 @@ class Pixelizer:
         
     
     def pixelize(self, ndx):
+        # Calculate pixel size
         x_steps = self.img_width / self.pix_width
         if self.img_width % self.pix_width > 0:
             x_steps += 1
         y_steps = self.img_height / self.pix_height
         if self.img_height % self.pix_height > 0:
             y_steps += 1        
+        
+        # Create pixels
         x_pos = 0
         y_pos = 0
         new_image = Image.new('RGB', (self.img_width, self.img_height))
