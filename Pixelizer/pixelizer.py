@@ -24,16 +24,21 @@ class Pixelizer:
     poster_image_names = None
     img_width = None
     img_height = None
+    target_img_width = None
+    target_img_height = None
     pix_width = None
     pix_height = None
     old_pix_width = 0
     old_pix_height = 0
 
-    def __init__(self, input_file, output_file, poster_cols, output_scale, output_scale_to=-1, \
+    def __init__(self, input_file, output_file, target_img_width, target_img_height, \
+                 poster_cols, output_scale, output_scale_to=-1, \
                  delta_scale=1):
         # initialize variables
         self.input_file = input_file
         self.output_file = output_file
+        self.target_img_width = target_img_width
+        self.target_img_height = target_img_height
         self.poster_cols = poster_cols
         self.output_scale_from = output_scale
         self.delta_scale = delta_scale
@@ -45,7 +50,13 @@ class Pixelizer:
         
         # Read source image    
         self.image = Image.open(self.input_file)            
-        self.img_width, self.img_height = self.image.size[0], self.image.size[1] 
+        self.img_width, self.img_height = self.image.size[0], self.image.size[1]
+        
+        # Determine target image size
+        if self.target_img_width == 0:
+            self.target_img_width = self.img_width
+        if self.target_img_height == 0:
+            self.target_img_height = self.img_height
 
         
     def execute(self): 
@@ -76,11 +87,11 @@ class Pixelizer:
     def create_poster(self):
         # Create empty poster that contains all generated images
         # and original image at the end
-        poster_width = self.img_width * self.poster_cols
+        poster_width = self.target_img_width * self.poster_cols
         height_factor = (len(self.poster_image_names) + 1) / self.poster_cols
         if (len(self.poster_image_names) + 1) % self.poster_cols > 0:
             height_factor += 1
-        poster_height = self.img_height * height_factor 
+        poster_height = self.target_img_height * height_factor 
         poster_image = Image.new('RGB', (poster_width, poster_height))
         
         # Fill poster with previously created pictures
@@ -89,8 +100,8 @@ class Pixelizer:
         print("Creating post with width " + str(poster_width) + " and height " + str(poster_height) + ".")
         for name in self.poster_image_names:
             tile_image = Image.open(name)
-            xpos_tile = col * self.img_width
-            ypos_tile = row * self.img_height
+            xpos_tile = col * self.target_img_width
+            ypos_tile = row * self.target_img_height
             poster_image.paste(tile_image, (xpos_tile, ypos_tile))
             tile_image.close()
             col += 1
@@ -99,13 +110,13 @@ class Pixelizer:
                 row +=1
                 
         # Add original picture at end of poster
-        xpos_tile = col * self.img_width
-        ypos_tile = row * self.img_height
+        xpos_tile = col * self.target_img_width
+        ypos_tile = row * self.target_img_height
         orig_image = Image.open(self.input_file)
-        poster_image.paste(orig_image, (xpos_tile, ypos_tile))
+        resized_orig_image = orig_image.resize((self.target_img_width, self.target_img_height), Image.ANTIALIAS)
+        poster_image.paste(resized_orig_image, (xpos_tile, ypos_tile))
         poster_image.save(self.output_file)
         print("Finished creating poster.")
-        
     
     def pixelize(self, ndx):
         # Calculate pixel size
@@ -132,9 +143,9 @@ class Pixelizer:
                 x_pos += self.pix_width
             x_pos = 0
             y_pos += self.pix_height
-        self.save_new_image(new_image, ndx)
+        resized_image = new_image.resize((self.target_img_width, self.target_img_height), Image.ANTIALIAS)
+        self.save_new_image(resized_image, ndx)
 
-    
     def save_new_image(self, image, ndx):
         # Save single image
         output_file = (str(ndx) + ".").join(self.output_file.rsplit('.', 1))
@@ -164,6 +175,7 @@ class Pixelizer:
     *** --file: Input file                             ***
     *** --scale, to_scale: Pixel creation ratio        ***
     *** --delta_scale: Scale change per iteration      ***
+    *** --img_width, img_height: Generated image size ***
     *** --poster_cols: Number of poster picture cols   ***
     *** --out: Output file                             ***            
     ****************************************************** '''
@@ -175,21 +187,30 @@ def main():
     parser.add_argument('--file', dest='imgFile', required=True)
     parser.add_argument('--scale', dest='scale', required=True)
     parser.add_argument('--to_scale', dest='to_scale', required=False)
-    parser.add_argument('--delta_scale', dest='delta_scale', required=False) 
+    parser.add_argument('--delta_scale', dest='delta_scale', required=False)
+    parser.add_argument('--img_width', dest='img_width', required=False)
+    parser.add_argument('--img_height', dest='img_height', required=False) 
     parser.add_argument('--poster_cols', dest='poster_cols', required=False)
     parser.add_argument('--out', dest='outFile', required=True)
     args = parser.parse_args() 
+    
+    img_width = 0 
+    img_height = 0
+    if args.img_width <> None:
+        img_width =  int(args.img_width)
+    if args.img_height <> None:
+        img_height = int(args.img_height)
      
     poster_cols = 0
     if args.poster_cols <> None:
         poster_cols = int(args.poster_cols)
      
     if args.to_scale == None:
-        pixelizer = Pixelizer(args.imgFile, args.outFile, poster_cols, int(args.scale))
+        pixelizer = Pixelizer(args.imgFile, args.outFile, img_width, img_height, poster_cols, int(args.scale))
     elif args.to_scale <> None and args.delta_scale == None:
-        pixelizer = Pixelizer(args.imgFile, args.outFile, poster_cols, int(args.scale), int(args.to_scale))
+        pixelizer = Pixelizer(args.imgFile, args.outFile, img_width, img_height, poster_cols, int(args.scale), int(args.to_scale))
     else:
-        pixelizer = Pixelizer(args.imgFile, args.outFile, poster_cols, int(args.scale), int(args.to_scale), \
+        pixelizer = Pixelizer(args.imgFile, args.outFile, img_width, img_height, poster_cols, int(args.scale), int(args.to_scale), \
                               int(args.delta_scale))
 
     pixelizer.execute()
