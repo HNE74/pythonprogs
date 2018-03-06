@@ -1,7 +1,9 @@
 '''
+Sample for generating a plot html plage using the Python Bottle Framework
+and the Flot Java Script library.
 Created on 06.03.2018
+@author: Heiko Nolte
 
-@author: hnema
 '''
 from bottle import route, run, static_file
 
