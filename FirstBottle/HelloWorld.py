@@ -177,7 +177,7 @@ def getdata():
     else:
         t = t + 0.1
     
-    y = 2 * math.sin(t) + 2 * math.sin(t+0.5)
+    y = 3 * math.sin(t) + 2 * math.cos(t+0.5)
     return {"Y": y }
 
 run(host='localhost', port=8080, debug=True)
