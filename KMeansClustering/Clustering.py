@@ -27,10 +27,11 @@ class KMeans:
         # Assigns input points to cluster points
         return min(range(self.k), key=lambda i: Vectorops.squared_distance(input, self.means[i]))
 
-    def train(self, inputs):
+    def train(self, inputs, figure):
         # Initialize cluster points randomly from input
         self.means = random.sample(inputs, self.k)
         
+        it_cnt = 0
         while True:
             # Assign input points to cluster points by squared distance calculation
             new_assignments = map(self.classify, inputs)
@@ -50,20 +51,29 @@ class KMeans:
                 
                 if i_points:
                     self.means[i] = Vectorops.vector_mean(i_points)
+            
+            if figure != None and it_cnt < 8:
+                it_cnt = it_cnt + 1
+                plot_clusters(inputs, self.means, self.assignments, figure, it_cnt)
     
     def squared_clustering_errors(self, inputs, k_param):
         # Calculates the total error of all input points for a certain number of cluster points (k)
         self.k = k_param
-        self.train(inputs)
+        self.train(inputs, None)
         assignments = map(self.classify, inputs)
         total_error = sum(Vectorops.squared_distance(input, self.means[cluster]) for input, cluster in zip(inputs, assignments))
         return total_error
     
-def plot_clusters(input_points, cluster_points, assignments):
+def plot_clusters(input_points, cluster_points, assignments, figure, subplot_id):
+
+    if figure != None:
+        figure.add_subplot(2,4,subplot_id)
+        figure.settitle = 'Iteration: ' + str(subplot_id)
 
     # Create dictionary with cluster point index numbers and empty assignments
     c_dict = {}
-    for c_ndx in range(len(cluster_points)):
+    k_cnt = len(cluster_points)
+    for c_ndx in range(k_cnt):
         c_dict[c_ndx] = []
     
     # Related assigned input point to cluster point index numbers
@@ -79,9 +89,9 @@ def plot_clusters(input_points, cluster_points, assignments):
         plt.scatter(cluster_points[cluster_ndx][0], cluster_points[cluster_ndx][1], 100, color=colornames[color_ndx], edgecolor='black')
         for input_point in c_dict.get(cluster_ndx):
             plt.scatter(input_point[0], input_point[1], 40, color=colornames[color_ndx], edgecolor='black')
-        
-    plt.title("K Means Clustering Algorithm")
-    plt.show()    
+            
+    if figure != None:
+        plt.grid(True)
 
 def plot_error_graph(inputs, clusterer):
     # Plots graph of total squared error for k cluster points and the given input points    
@@ -93,21 +103,36 @@ def plot_error_graph(inputs, clusterer):
     plt.xlabel('k')
     plt.ylabel('total squared error')
     plt.title('Total Error by Number of Clusters')
-    plt.show()
+    print errors
+
+def onclick(event):
+    print event
 
 def main():
     #inputs = [ (-50, 20), (-50, 0), (-52, 5), (-40, 10), (20, 10), (15, 5)]
-    inputs = [(random.randint(0,20), random.randint(0,20)) for num in range(20)]
+    inputs = [(random.randint(0,100), random.randint(0,100)) for num in range(25)]
     
     random.seed(0)    
-    clusterer = KMeans(1)
-    clusterer.train(inputs)
+    clusterer = KMeans(1)  
+    clusterer.train(inputs, None)
     plot_error_graph(inputs, clusterer) 
+    plt.show(block=True) 
+    print 'Enter K Value>'
+    try:
+        k_select = int(raw_input())   
+    except:
+        print 'Invalid K Value entered. Setting k to 3.'
+        k_select = 3
     
-    clusterer = KMeans(3)
-    clusterer.train(inputs)
-    result = clusterer.means    
-    plot_clusters(inputs, result, clusterer.assignments)
+    clusterer = KMeans(k_select)
+    figure = plt.figure(1)
+    plt.title("K Means Clustering Algorithm Iterations - K=" + str(k_select)) 
+    clusterer.train(inputs, figure)
+    plt.show(block=True)
+    
+    plt.title("K Means Clustering Algorithm Result - K=" + str(k_select))
+    plot_clusters(inputs, clusterer.means, clusterer.assignments, None, 0)   
+    plt.show(block=True)
 
 if __name__ == '__main__':
     main()
