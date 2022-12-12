@@ -91,6 +91,7 @@ def updateGame():
 
         
 def draw():
+    screen.surface = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
     screen.draw.filled_rect(Rect(0,0,800,400), (163, 232, 254))
     screen.draw.filled_rect(Rect(0,400,800,200), (88, 242, 152))
     
