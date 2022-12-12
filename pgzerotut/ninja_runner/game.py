@@ -20,6 +20,7 @@ velocity_y = 0
 gravity = 1
 obstacles = []
 obstacles_timeout = 0
+obstacles_next = 0
 
 def init_game():
     global velocity_y
@@ -36,15 +37,12 @@ def init_game():
     score = 0
     obstacles = []
     obstacles_timeout = 0
+    obstacles_next = 50
 
     game_over = False
 
 
 init_game()
-
-
-
-
 
 def update():
     global game_over
@@ -58,6 +56,7 @@ def update():
 def updateGame():
     global velocity_y
     global obstacles_timeout
+    global obstacles_next
     global score
     global game_over
 
@@ -76,12 +75,13 @@ def updateGame():
         runner.y = 400
 
     obstacles_timeout += 1
-    if obstacles_timeout > 50:
+    if obstacles_timeout > obstacles_next:
         actor = Actor('cactus')
         actor.x = 850
         actor.y = 430
         obstacles.append(actor)
         obstacles_timeout = 0
+        obstacles_next = random.randint(40,60)
     
     for actor in obstacles:
         actor.x -= 8 
