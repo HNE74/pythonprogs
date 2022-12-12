@@ -1,7 +1,5 @@
-x = 50
-y = 50
 import os
-os.environ['SDL_VIDEO_WINDOW_POS'] = f'{x},{y}'
+os.environ['SDL_VIDEO_WINDOW_POS'] = f'{50},{50}'
 import pgzrun, random
 from pgzhelper import *
 
