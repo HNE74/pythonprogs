@@ -159,43 +159,27 @@ def apply_sidewinder_algorithm(maze):
                 else:
                     maze.connect(cell, Direction.EAST)
 
-def apply_hunt_and_kill_algorithm(maze):
-    cell = maze.current
-    cell.visited = True
-    while cell:
-        print(cell.x, cell.y)
-        unvisited_neighbors = []
-        for neighbor in cell.neighbors:
-            if neighbor and not neighbor.visited:
-                unvisited_neighbors.append(neighbor)
-        if len(unvisited_neighbors) > 0:
-            neighbor = random.choice(unvisited_neighbors)
-            maze.connect_neighbor(cell, neighbor)
-            maze.stack.append(cell)
-            cell = neighbor
-            cell.visited = True
+# Apply the recursive backtracking algorithm to the maze
+def apply_recursive_backtracking_algorithm(maze):
+    while True:
+        if maze.current:
+            maze.current.visited = True
+            unvisited_neighbors = []
+            for neighbor in maze.current.neighbors:
+                if neighbor and not neighbor.visited:
+                    unvisited_neighbors.append(neighbor)
+            if len(unvisited_neighbors) > 0:
+                neighbor = random.choice(unvisited_neighbors)
+                maze.stack.append(maze.current)
+                maze.connect_neighbor(maze.current, neighbor)
+                maze.current = neighbor
+            elif len(maze.stack) > 0:
+                maze.current = maze.stack.pop()
+            else:
+                break
         else:
-            cell = None
-            for candidate in maze.cells:
-                if not candidate.visited and len(candidate.neighbors) > 0:
-                    visited_neighbors = []
-                    for neighbor in candidate.neighbors:
-                        if neighbor and neighbor.visited:
-                            visited_neighbors.append(neighbor)
-                    if len(visited_neighbors) > 0:
-                        cell = candidate
-                        neighbor = random.choice(visited_neighbors)
-                        maze.connect_neighbor(cell, neighbor)
-                        cell.visited = True
-                        break
-            if not cell:
-                if len(maze.stack) > 0:
-                    cell = maze.stack.pop()
-                else:
-                    cell = random.choice(maze.cells)
-                    cell.visited = True
-
-
+            break
+   
 def update():
     # Your game logic here
     pass
@@ -210,10 +194,10 @@ def on_key_down(key):
     if key == keys.SPACE: # Recreate the maze
         global maze
         maze = Maze(maze_with, maze_height)
-        apply_hunt_and_kill_algorithm(maze)
+        crave_path_until_no_more_unvisited_neighbors(maze)
 
 
-maze_with, maze_height = 3, 3
+maze_with, maze_height = 10, 10
 maze = Maze(maze_with, maze_height)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
