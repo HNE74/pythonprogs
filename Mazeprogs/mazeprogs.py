@@ -35,12 +35,12 @@ class Direction(Enum):
 class MazeCell: 
 
     #constructor method
-    def __init__(self, i, w, h):
+    def __init__(self, i, wp, hp, w=20, h=20):
         self.i = i
         self.w = w
         self.h = h
-        self.x = i % w
-        self.y = i // w
+        self.x = i % wp
+        self.y = i // wp
         self.visited = False
         self.walls = [True, True, True, True]
         self.neighbors = []   
@@ -107,22 +107,31 @@ class Maze:
         for cell in self.cells:
             cell.draw(screen, xoffset, yoffset)
 
+
+def create_binary_tree_maze(maze):
+    for cell in maze.cells:
+        if cell.neighbors[0] and cell.neighbors[2]:
+            maze.connect(cell, Direction.NORTH)
+        elif cell.neighbors[0] and cell.neighbors[3]:
+            maze.connect(cell, Direction.EAST)
+        elif cell.neighbors[1] and cell.neighbors[2]:
+            maze.connect(cell, Direction.WEST)
+        elif cell.neighbors[1] and cell.neighbors[3]:
+            maze.connect(cell, Direction.SOUTH)
+
 def update():
     # Your game logic here
     pass
 
 def draw():
     screen.clear()
-    maze = Maze(20, 20)
-
-    cell = maze.get_cell(5,5)
-    maze.connect(cell, Direction.NORTH)
-
     maze.draw(screen,50,50) 
 
 def on_key_down(key):
     if key == keys.ESCAPE:  # You can change this to any key you want
         exit()
 
+
+maze = Maze(5, 5)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
