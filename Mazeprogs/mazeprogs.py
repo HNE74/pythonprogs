@@ -1,4 +1,5 @@
 import pgzrun
+import os
 
 
 # A Maze Cell   
@@ -64,7 +65,7 @@ def draw():
 
 def on_key_down(key):
     if key == keys.ESCAPE:  # You can change this to any key you want
-        # This will quit the game
         exit()
 
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
