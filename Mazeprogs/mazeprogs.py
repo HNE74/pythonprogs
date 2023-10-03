@@ -216,6 +216,7 @@ def update():
 
 def draw():
     screen.clear()
+    screen.draw.text("Algorithm: " + get_algorithm_name(algorithms[selected_algorithm]), (50, 20), color="white")
     maze.draw(screen,50,50) 
 
 def on_key_down(key):
@@ -231,10 +232,10 @@ def on_key_down(key):
         if selected_algorithm >= len(algorithms):
             selected_algorithm = 0
         algorithms[selected_algorithm](maze)
-        print ("Maze created with algorithm: ", algorithms[selected_algorithm].__name__ )
-
-
-        
+   
+# remove apply_ from and underscore from function name
+def get_algorithm_name(algorithm):
+    return algorithm.__name__.replace("apply", "").replace("_", " ").replace("algorithm", "")
 
 # add algorithms functions to list
 algorithms = []
@@ -247,5 +248,6 @@ selected_algorithm = 0
 
 maze_with, maze_height = 20, 20
 maze = Maze(maze_with, maze_height)
+algorithms[selected_algorithm](maze)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
