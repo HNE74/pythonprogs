@@ -108,7 +108,7 @@ class Maze:
         for cell in self.cells:
             cell.draw(screen, xoffset, yoffset)
 
-
+# Apply the binary tree algorithm to the maze
 def apply_binary_tree_algorithm(maze):
     for xp in range(maze.w):
         for yp in range(maze.h):
@@ -126,6 +126,25 @@ def apply_binary_tree_algorithm(maze):
                     else:
                         maze.connect(cell, Direction.EAST)
 
+# Apply the sidewinder algorithm to the maze
+def apply_sidewinder_algorithm(maze):
+    for yp in range(maze.h):
+        run = []
+        for xp in range(maze.w):
+            cell = maze.get_cell(xp, yp)
+            if cell:
+                run.append(cell)
+                at_eastern_boundary = xp == maze.w - 1
+                at_southern_boundary = yp == maze.h - 1
+                should_close_out = at_eastern_boundary \
+                    or (not at_southern_boundary and random.randint(0, 1) == 0)
+                if should_close_out:
+                    member = random.choice(run)
+                    if member:
+                        maze.connect(member, Direction.SOUTH)
+                    run.clear()
+                else:
+                    maze.connect(cell, Direction.EAST)
 
 def update():
     # Your game logic here
@@ -141,10 +160,10 @@ def on_key_down(key):
     if key == keys.SPACE: # Recreate the maze
         global maze
         maze = Maze(maze_with, maze_height)
-        apply_binary_tree_algorithm(maze)
+        apply_sidewinder_algorithm(maze)
+
 
 maze_with, maze_height = 20, 20
 maze = Maze(maze_with, maze_height)
-apply_binary_tree_algorithm(maze)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
