@@ -179,6 +179,36 @@ def apply_recursive_backtracking_algorithm(maze):
                 break
         else:
             break
+
+def apply_hunt_and_kill_algorithm(maze):
+    maze.current = maze.cells[0]
+    while True:
+        if maze.current:
+            maze.current.visited = True
+            unvisited_neighbors = []
+            for neighbor in maze.current.neighbors:
+                if neighbor and not neighbor.visited:
+                    unvisited_neighbors.append(neighbor)
+            if len(unvisited_neighbors) > 0:
+                neighbor = random.choice(unvisited_neighbors)
+                maze.connect_neighbor(maze.current, neighbor)
+                maze.current = neighbor
+            else:
+                maze.current = None
+                for cell in maze.cells:
+                    if not cell.visited:
+                        visited_neighbors = []
+                        for neighbor in cell.neighbors:
+                            if neighbor and neighbor.visited:
+                                visited_neighbors.append(neighbor)
+                        if len(visited_neighbors) > 0: 
+                            maze.connect_neighbor(cell, random.choice(visited_neighbors))
+                            maze.current = cell
+                            break
+                if not maze.current:
+                    break
+        else:
+            break
    
 def update():
     # Your game logic here
@@ -194,10 +224,10 @@ def on_key_down(key):
     if key == keys.SPACE: # Recreate the maze
         global maze
         maze = Maze(maze_with, maze_height)
-        crave_path_until_no_more_unvisited_neighbors(maze)
+        apply_hunt_and_kill_algorithm(maze)
 
 
-maze_with, maze_height = 10, 10
+maze_with, maze_height = 20, 20
 maze = Maze(maze_with, maze_height)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
