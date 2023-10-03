@@ -1,6 +1,7 @@
 import pgzrun
 import os
 from enum import Enum
+import random
 
 # Direction enum
 class Direction(Enum):
@@ -51,13 +52,13 @@ class MazeCell:
         y = self.y * self.h + yoffset
 
         if self.walls[0]:
-            screen.draw.line((x, y), (x + self.w-4, y), (255, 255, 255))
+            screen.draw.line((x, y), (x + self.w, y), (255, 255, 255))
         if self.walls[1]:
-            screen.draw.line((x, y + self.h-4), (x + self.w-4, y + self.h-4), (255, 255, 255))
+            screen.draw.line((x, y + self.h), (x + self.w, y + self.h), (255, 255, 255))
         if self.walls[2]:
-            screen.draw.line((x, y), (x, y + self.h-4), (255, 255, 255))
+            screen.draw.line((x, y), (x, y + self.h), (255, 255, 255))
         if self.walls[3]:
-            screen.draw.line((x + self.w-4, y), (x + self.w-4, y + self.h-4), (255, 255, 255))
+            screen.draw.line((x + self.w, y), (x + self.w, y + self.h), (255, 255, 255))
 
 # A Maze is a collection of MazeCells
 class Maze:
@@ -109,15 +110,22 @@ class Maze:
 
 
 def create_binary_tree_maze(maze):
-    for cell in maze.cells:
-        if cell.neighbors[0] and cell.neighbors[2]:
-            maze.connect(cell, Direction.NORTH)
-        elif cell.neighbors[0] and cell.neighbors[3]:
-            maze.connect(cell, Direction.EAST)
-        elif cell.neighbors[1] and cell.neighbors[2]:
-            maze.connect(cell, Direction.WEST)
-        elif cell.neighbors[1] and cell.neighbors[3]:
-            maze.connect(cell, Direction.SOUTH)
+    for xp in range(maze.w):
+        for yp in range(maze.h):
+            cell = maze.get_cell(xp, yp)
+            if cell:
+                if xp == maze.w - 1 and yp == maze.h - 1:
+                    continue
+                elif xp == maze.w - 1:
+                    maze.connect(cell, Direction.SOUTH)
+                elif yp == maze.h - 1:
+                    maze.connect(cell, Direction.EAST)
+                else:
+                    if random.randint(0, 1) == 0:
+                        maze.connect(cell, Direction.SOUTH)
+                    else:
+                        maze.connect(cell, Direction.EAST)
+
 
 def update():
     # Your game logic here
@@ -131,7 +139,7 @@ def on_key_down(key):
     if key == keys.ESCAPE:  # You can change this to any key you want
         exit()
 
-
 maze = Maze(5, 5)
+create_binary_tree_maze(maze)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
