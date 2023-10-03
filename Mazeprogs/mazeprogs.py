@@ -95,6 +95,19 @@ class Maze:
         if neighbor:
             cell.walls[direction.value] = False
             neighbor.walls[direction.opposite().value] = False
+
+    # Connect two cells
+    def connect_neighbor(self, cell1, cell2):
+        if cell1.x == cell2.x:
+            if cell1.y == cell2.y - 1:
+                self.connect(cell1, Direction.SOUTH)
+            elif cell1.y == cell2.y + 1:
+                self.connect(cell1, Direction.NORTH)
+        elif cell1.y == cell2.y:
+            if cell1.x == cell2.x - 1:
+                self.connect(cell1, Direction.EAST)
+            elif cell1.x == cell2.x + 1:
+                self.connect(cell1, Direction.WEST)
     
     # Get cell at x, y
     def get_cell(self, x, y):
@@ -146,6 +159,43 @@ def apply_sidewinder_algorithm(maze):
                 else:
                     maze.connect(cell, Direction.EAST)
 
+def apply_hunt_and_kill_algorithm(maze):
+    cell = maze.current
+    cell.visited = True
+    while cell:
+        print(cell.x, cell.y)
+        unvisited_neighbors = []
+        for neighbor in cell.neighbors:
+            if neighbor and not neighbor.visited:
+                unvisited_neighbors.append(neighbor)
+        if len(unvisited_neighbors) > 0:
+            neighbor = random.choice(unvisited_neighbors)
+            maze.connect_neighbor(cell, neighbor)
+            maze.stack.append(cell)
+            cell = neighbor
+            cell.visited = True
+        else:
+            cell = None
+            for candidate in maze.cells:
+                if not candidate.visited and len(candidate.neighbors) > 0:
+                    visited_neighbors = []
+                    for neighbor in candidate.neighbors:
+                        if neighbor and neighbor.visited:
+                            visited_neighbors.append(neighbor)
+                    if len(visited_neighbors) > 0:
+                        cell = candidate
+                        neighbor = random.choice(visited_neighbors)
+                        maze.connect_neighbor(cell, neighbor)
+                        cell.visited = True
+                        break
+            if not cell:
+                if len(maze.stack) > 0:
+                    cell = maze.stack.pop()
+                else:
+                    cell = random.choice(maze.cells)
+                    cell.visited = True
+
+
 def update():
     # Your game logic here
     pass
@@ -160,10 +210,10 @@ def on_key_down(key):
     if key == keys.SPACE: # Recreate the maze
         global maze
         maze = Maze(maze_with, maze_height)
-        apply_sidewinder_algorithm(maze)
+        apply_hunt_and_kill_algorithm(maze)
 
 
-maze_with, maze_height = 20, 20
+maze_with, maze_height = 3, 3
 maze = Maze(maze_with, maze_height)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
