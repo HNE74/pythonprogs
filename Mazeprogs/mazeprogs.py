@@ -109,7 +109,7 @@ class Maze:
             cell.draw(screen, xoffset, yoffset)
 
 
-def create_binary_tree_maze(maze):
+def apply_binary_tree_algorithm(maze):
     for xp in range(maze.w):
         for yp in range(maze.h):
             cell = maze.get_cell(xp, yp)
@@ -138,8 +138,13 @@ def draw():
 def on_key_down(key):
     if key == keys.ESCAPE:  # You can change this to any key you want
         exit()
+    if key == keys.SPACE: # Recreate the maze
+        global maze
+        maze = Maze(maze_with, maze_height)
+        apply_binary_tree_algorithm(maze)
 
-maze = Maze(5, 5)
-create_binary_tree_maze(maze)
+maze_with, maze_height = 20, 20
+maze = Maze(maze_with, maze_height)
+apply_binary_tree_algorithm(maze)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pgzrun.go()
