@@ -224,8 +224,26 @@ def on_key_down(key):
     if key == keys.SPACE: # Recreate the maze
         global maze
         maze = Maze(maze_with, maze_height)
-        apply_hunt_and_kill_algorithm(maze)
+        
+        # select an algorithm by index
+        global selected_algorithm
+        selected_algorithm += 1
+        if selected_algorithm >= len(algorithms):
+            selected_algorithm = 0
+        algorithms[selected_algorithm](maze)
+        print ("Maze created with algorithm: ", algorithms[selected_algorithm].__name__ )
 
+
+        
+
+# add algorithms functions to list
+algorithms = []
+algorithms.append(apply_binary_tree_algorithm)
+algorithms.append(apply_sidewinder_algorithm)
+algorithms.append(apply_recursive_backtracking_algorithm)
+algorithms.append(apply_hunt_and_kill_algorithm)
+global selected_algorithm
+selected_algorithm = 0
 
 maze_with, maze_height = 20, 20
 maze = Maze(maze_with, maze_height)
